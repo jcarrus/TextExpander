@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript">
+
+/*
+Storage.prototype.setObj = function(key, obj) {
+    return this.setItem(key, JSON.stringify(obj))
+}
+Storage.prototype.getObj = function(key) {
+    return JSON.parse(this.getItem(key))
+    */
+//}
+
+function setSelectionRange(input, selectionStart, selectionEnd) {
+  if (input.setSelectionRange) {
+    input.focus();
+    input.setSelectionRange(selectionStart, selectionEnd);
+  }
+  else if (input.createTextRange) {
+    var range = input.createTextRange();
+    range.collapse(true);
+    range.moveEnd('character', selectionEnd);
+    range.moveStart('character', selectionStart);
+    range.select();
+  }
+}
+
+function setCaretToPos (input, pos) {
+  setSelectionRange(input, pos, pos);
+}
+
+
+var shortcuts = {"omg" : "oh my goodness", "bbt" : "Big Bang Theory", "jcar" : "Justin William Carrus"};
+sessionStorage.setItem('temporaryShortcuts', JSON.stringify(shortcuts));
+console.log(JSON.stringify(shortcuts));
+sessionStorage.setItem('newCommandMode', 'false');
+sessionStorage.setItem('specialMode', 'false');
+
+function textExpansion(e) {
+	var code = e.keyCode;
+	console.log(code);
+	var endOfShortcut = false;
+	if (code == 32 || // space
+		code == 9 || // tab
+		code == 13 || // enter
+		code == 186 || // ";"
+		code == 188 || // ","
+		code == 189 || // "-"
+		code == 190 || // "."
+		code == 222 || // "'" for "'" and """
+		code == 191 || // "/" for "?"
+		code == 49 // "1" for "!"
+		){
+		endOfShortcut = true;
+	}
+
+
+	if (endOfShortcut && sessionStorage.getItem('specialMode') == 'true'){
+  		interpret(document.getElementById('textArea').value, document.getElementById('textArea').selectionStart);
+  	}
+
+  	if (endOfShortcut && sessionStorage.getItem('newCommandMode') == 'true'){
+  		newCommand(document.getElementById('textArea').value, document.getElementById('textArea').selectionStart);
+  	}
+
+	if (code == 186){
+	    console.log("semiColon detected");
+	    modeDetection(document.getElementById('textArea').value, document.getElementById('textArea').selectionStart);
+  	}
+
+  	document.getElementById('charCount').innerHTML = document.getElementById('textArea').value.length + 1;
+
+  	
+}
+
+function  modeDetection(text, cursorPos){
+
+	//Check for special mode
+	try {
+
+		if (text.substring(cursorPos - 1, cursorPos) == ";") {
+			sessionStorage.setItem('specialMode', 'true');
+			console.log("settotrue");
+		}
+	}
+
+	catch(e) {
+	}
+
+	try {
+
+		if (text.substring(cursorPos - 1, cursorPos) == ":" &&
+			text.substring(0, cursorPos).match("::").length > 0) {
+			sessionStorage.setItem('newCommandMode', 'true');
+			console.log("newcommandsettotrue");
+		}
+	}
+
+	catch(e) {
+	}	
+
+}
+
+
+function interpret(text, cursorPos){
+	
+	//There are three options for this function to be reached.
+	//Either there were two semicolons and then a keycode (shortcut)
+	//that needs text expansion or two semicolons and then a formatting
+	//code that signifies the start of a formatting change or
+	//there was a formatting code and then two semicolons signifying
+	//the end of a formatting change. In anycase, the last character typed
+	//was a space and was preceeded by a combinaion of letters and the ";;"
+
+	//Import the phrases
+
+	var permanentShortcuts = JSON.parse(localStorage.getItem('permanentShortcuts'));
+	var temporaryShortcuts = JSON.parse(sessionStorage.getItem('temporaryShortcuts'));
+
+	//First we test for an expansion
+	try {
+
+		var keyCodeStart = text.substring(0, cursorPos - 1).lastIndexOf(';');
+		var keyCode = text.substring(keyCodeStart + 1, cursorPos);
+		console.log(keyCode);
+
+
+		try {
+			console.log(permanentShortcuts[keyCode]);
+			if (permanentShortcuts[keyCode] !== undefined){
+				console.log(text);
+				var searchText = ";;" + keyCode.toString();
+				var replacementText = permanentShortcuts[keyCode].toString();
+				console.log(searchText + ":" + replacementText);
+				text = text.substring(0, cursorPos - (keyCode.length + 2)) + replacementText + text.substring(cursorPos);
+				document.getElementById('textArea').value = text;
+				setCaretToPos(textArea, cursorPos - (keyCode.length + 2) + replacementText.length);
+				console.log(text);
+				sessionStorage.setItem('specialMode', 'false');
+			}
+		} catch(e) {}
+
+		try {
+			console.log(temporaryShortcuts[keyCode]);
+			if (temporaryShortcuts[keyCode] !== undefined){
+				console.log(text);
+				var searchText = ";;" + keyCode.toString();
+				var replacementText = temporaryShortcuts[keyCode].toString();
+				console.log(searchText + ":" + replacementText);
+				text = text.substring(0, cursorPos - (keyCode.length + 2)) + replacementText + text.substring(cursorPos);
+				document.getElementById('textArea').value = text;
+				setCaretToPos(textArea, cursorPos - (keyCode.length + 2) + replacementText.length);
+				console.log(text);
+				sessionStorage.setItem('specialMode', 'false');
+			}
+		} catch(e) {}
+	} catch(e) {}
+}
+
+
+function newCommand(text, cursorPos){
+
+	//This adds the new expansion to the temporary database if the shortcut doesn't already exist.
+
+	var permanentShortcuts = JSON.parse(localStorage.getItem('permanentShortcuts'));
+	var temporaryShortcuts = JSON.parse(sessionStorage.getItem('temporaryShortcuts'));
+
+
+	try {
+		var shortcutStart = text.substring(0, cursorPos).lastIndexOf('::');
+		var shortcut = text.substring(shortcutStart + 2, cursorPos);
+		console.log("shortcut:" + shortcut);
+		var expansionStart = text.substring(0, cursorPos - 2 - shortcut.length).lastIndexOf('::');
+		var expansion = text.substring(expansionStart + 2, shortcutStart);
+		console.log("expansion:" + expansion);
+		console.log(temporaryShortcuts[shortcut]);
+		if (temporaryShortcuts[shortcut] == undefined && temporaryShortcuts[shortcut] == undefined){
+			var toAdd = ',"' + shortcut + '":"' + expansion +'"}';
+			var newTemporaryShortcuts = JSON.stringify(temporaryShortcuts);
+			console.log("JSON STRING:" + newTemporaryShortcuts);
+			newTemporaryShortcuts = newTemporaryShortcuts.substring(0, newTemporaryShortcuts.length - 1);
+			newTemporaryShortcuts += toAdd;
+			console.log("NEW STRING:" + newTemporaryShortcuts);
+			temporaryShortcuts = JSON.stringify(JSON.parse(newTemporaryShortcuts));
+			sessionStorage.setItem('temporaryShortcuts', temporaryShortcuts);
+			console.log("added shortcut");
+			console.log(cursorPos);
+			text = text.substring(0, cursorPos - 4 - shortcut.length - expansion.length) + expansion + text.substring(cursorPos);
+			document.getElementById('textArea').value = text;
+			setCaretToPos(textArea, cursorPos - (4 + shortcut.length));
+			sessionStorage.setItem('newCommandMode', 'false');
+
+		}
+
+		else {
+			throw "Shortcut combination already taken.";
+		}
+
+		updateCheatSheet();
+	}
+
+	catch(e){
+		alert(e);
+		console.log(e);
+	}
+
+}
+
+function updateCheatSheet(){
+
+	var table = document.getElementById("temporaryShortcuts");
+	var numRows = table.rows.length;
+	for (var i = 0; i < numRows; i++){
+		table.deleteRow(0);
+	}
+
+
+	var temporaryShortcuts = sessionStorage.getItem('temporaryShortcuts').replace(/\"/g, '');
+	console.log(temporaryShortcuts);
+	temporaryShortcuts = temporaryShortcuts.substring(1, temporaryShortcuts.length - 1);
+	temporaryShortcuts = temporaryShortcuts.split(",");
+
+
+
+
+
+
+
+
+
+
+
+	for (var i = 0; i < temporaryShortcuts.length; i++){
+		var shortcut = temporaryShortcuts[i].split(':');
+		var tr=document.createElement('tr');
+        var len=shortcut.length;
+
+
+        var td1=document.createElement('td');
+        td1.style = "align:right";
+        td1.appendChild(document.createTextNode(shortcut[0]));
+        tr.appendChild(td1);
+
+ 		var td2=document.createElement('td');
+        td2.style = "align:left";
+        td2.appendChild(document.createTextNode(":"));
+        tr.appendChild(td2);
+
+ 		var td3=document.createElement('td');
+        td3.style = "align:left";
+        td3.appendChild(document.createTextNode(shortcut[1]));
+        tr.appendChild(td3);
+
+
+        document.getElementById('temporaryShortcuts').appendChild(tr);
+
+
+	}
+}
+
+</script>
+
+
+</head>
+<body onload="document.getElementById('textArea').value = '';">
+
+<h1>TextExpander</h1>
+
+<table>
+	<tbody>
+		<tr>	
+			<td>
+				<textarea rows="10" cols="50" onKeyDown="textExpansion(event);" id="textArea" name="textArea"> </textarea>
+			</td>
+			<td>
+				
+				<table>
+					<tbody id="temporaryShortcuts">
+
+					</tbody>
+
+				</table>
+
+				<!--<p id="p1"> </p> -->
+
+			</td>
+		</tr>
+	</tbody>
+</table>
+<button onclick="updateCheatSheet();">Clickme</button>
+
+<p id="charCount"> </p>
+
+</body>
+</html> 
+
+

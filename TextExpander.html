@@ -31,7 +31,7 @@ function setCaretToPos (input, pos) {
 }
 
 
-var shortcuts = {"omg" : "oh my goodness", "bbt" : "Big Bang Theory", "jcar" : "Justin William Carrus"};
+var shortcuts = {};
 sessionStorage.setItem('temporaryShortcuts', JSON.stringify(shortcuts));
 console.log(JSON.stringify(shortcuts));
 sessionStorage.setItem('newCommandMode', 'false');
@@ -268,6 +268,7 @@ function updateCheatSheet(){
 
 <h1>TextExpander</h1>
 
+<p>To add a shortcut, use the form "::expantion text::shortcut" and to expand an existing shortcut, use the form ";;shortcut".</p>
 <table>
 	<tbody>
 		<tr>	

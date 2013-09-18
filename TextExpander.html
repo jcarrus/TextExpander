@@ -31,7 +31,7 @@ function setCaretToPos (input, pos) {
 }
 
 
-var shortcuts = {"exampleExpantion":"exampleShortcut"};
+var shortcuts = {};
 sessionStorage.setItem('temporaryShortcuts', JSON.stringify(shortcuts));
 console.log(JSON.stringify(shortcuts));
 sessionStorage.setItem('newCommandMode', 'false');
@@ -179,7 +179,7 @@ function newCommand(text, cursorPos){
 		if (temporaryShortcuts[shortcut] == undefined && temporaryShortcuts[shortcut] == undefined){
 			var newTemporaryShortcuts = JSON.stringify(temporaryShortcuts);
 			console.log("|" + newTemporaryShortcuts + "|");
-			if (newTemporaryShortcuts == "") {
+			if (newTemporaryShortcuts == "{}") {
 				var toAdd = '"' + shortcut + '":"' + expansion +'"}';
 			} else{
 				var toAdd = ',"' + shortcut + '":"' + expansion +'"}';

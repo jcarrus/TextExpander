@@ -36,7 +36,7 @@ sessionStorage.setItem('temporaryShortcuts', JSON.stringify(shortcuts));
 console.log(JSON.stringify(shortcuts));
 sessionStorage.setItem('newCommandMode', 'false');
 sessionStorage.setItem('specialMode', 'false');
-updateCheatSheet();
+
 
 function textExpansion(e) {
 	var code = e.keyCode;
@@ -272,7 +272,7 @@ function updateCheatSheet(){
 	<tbody>
 		<tr>	
 			<td>
-				<textarea rows="10" cols="50" onKeyDown="textExpansion(event);" id="textArea" name="textArea"> </textarea>
+				<textarea rows="10" cols="50" onKeyDown="textExpansion(event);" id="textArea" name="textArea" onFocus="updateCheatSheet();"> </textarea>
 			</td>
 			<td>
 				

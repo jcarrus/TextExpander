@@ -178,6 +178,7 @@ function newCommand(text, cursorPos){
 		console.log(temporaryShortcuts[shortcut]);
 		if (temporaryShortcuts[shortcut] == undefined && temporaryShortcuts[shortcut] == undefined){
 			var newTemporaryShortcuts = JSON.stringify(temporaryShortcuts);
+			console.log("|" + newTemporaryShortcuts + "|");
 			if (newTemporaryShortcuts == "") {
 				var toAdd = '"' + shortcut + '":"' + expansion +'"}';
 			} else{

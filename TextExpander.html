@@ -177,7 +177,11 @@ function newCommand(text, cursorPos){
 		console.log("expansion:" + expansion);
 		console.log(temporaryShortcuts[shortcut]);
 		if (temporaryShortcuts[shortcut] == undefined && temporaryShortcuts[shortcut] == undefined){
-			var toAdd = ',"' + shortcut + '":"' + expansion +'"}';
+			if (temporaryShortcuts.length == 0) {
+				var toAdd = '"' + shortcut + '":"' + expansion +'"}';
+			} else{
+				var toAdd = ',"' + shortcut + '":"' + expansion +'"}';
+			}
 			var newTemporaryShortcuts = JSON.stringify(temporaryShortcuts);
 			console.log("JSON STRING:" + newTemporaryShortcuts);
 			newTemporaryShortcuts = newTemporaryShortcuts.substring(0, newTemporaryShortcuts.length - 1);

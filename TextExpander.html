@@ -36,6 +36,7 @@ sessionStorage.setItem('temporaryShortcuts', JSON.stringify(shortcuts));
 console.log(JSON.stringify(shortcuts));
 sessionStorage.setItem('newCommandMode', 'false');
 sessionStorage.setItem('specialMode', 'false');
+updateCheatSheet();
 
 function textExpansion(e) {
 	var code = e.keyCode;
@@ -288,9 +289,9 @@ function updateCheatSheet(){
 		</tr>
 	</tbody>
 </table>
-<button onclick="updateCheatSheet();">Clickme</button>
+<button onclick="updateCheatSheet();" style="display:none">Clickme</button>
 
-<p id="charCount"> </p>
+<p id="charCount" style="display:none"> </p>
 
 </body>
 </html> 
